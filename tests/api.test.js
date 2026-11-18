@@ -34,3 +34,17 @@ test("JSON report handles invalid directory", () => {
 
   assert.equal(report.status, "error");
 });
+test("JSON report includes version compatibility results", () => {
+  const report = doctor.getProjectReport("tests/sample-android");
+
+  assert.equal(report.agpVersion, "8.7.3");
+  assert.equal(report.gradleVersion, "8.9");
+  assert.equal(report.javaVersion, 21);
+
+  assert.equal(report.compatibility.status, "compatible");
+  assert.equal(report.compatibility.checks.length, 3);
+
+  for (const check of report.compatibility.checks) {
+    assert.equal(check.status, "compatible");
+  }
+});
