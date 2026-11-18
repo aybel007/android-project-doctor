@@ -1,4 +1,8 @@
 const fs = require("node:fs");
+const {
+  checkCompatibility,
+  parseJavaMajor
+} = require("./compatibility");
 const path = require("node:path");
 const { spawnSync } = require("node:child_process");
 
@@ -51,7 +55,35 @@ function getGradleVersion(projectPath) {
 
   return match ? match[1] : null;
 }
+function getAgpVersion(projectPath) {
+  const possibleFiles = [
+    "app/build.gradle",
+    "app/build.gradle.kts",
+    "build.gradle",
+    "build.gradle.kts"
+  ];
 
+  for (const file of possibleFiles) {
+    const filePath = path.join(projectPath, file);
+
+    if (!fs.existsSync(filePath)) continue;
+
+    const content = fs.readFileSync(filePath, "utf8");
+
+    const patterns = [
+      /id\s*['"]com\.android\.application['"]\s*version\s*['"]([^'"]+)['"]/,
+      /id\s*\(\s*['"]com\.android\.application['"]\s*\)\s*version\s*['"]([^'"]+)['"]/,
+      /com\.android\.tools\.build:gradle:([^'"]+)/
+    ];
+
+    for (const pattern of patterns) {
+      const match = content.match(pattern);
+      if (match) return match[1];
+    }
+  }
+
+  return null;
+}
 function hasNonEmptyFile(directory, names) {
   return names.some(name => {
     const file = path.join(directory, name);
@@ -306,7 +338,22 @@ analyzeGradleConfig(absolutePath);
   }
 
   const gradleVersion = getGradleVersion(absolutePath);
+const compatibility = checkCompatibility({
+  agpVersion: getAgpVersion(absolutePath),
+  gradleVersion,
+  javaVersion: parseJavaMajor(javaVersion)
+});
 
+console.log("\nVERSION COMPATIBILITY CHECKS\n");
+console.log("[INFO] Overall compatibility:", compatibility.status);
+
+for (const check of compatibility.checks) {
+  const label =
+    check.status === "compatible" ? "PASS" :
+    check.status === "incompatible" ? "ERROR" : "WARN";
+
+  console.log(`[${label}] ${check.name}: ${check.message}`);
+}
   if (gradleVersion) {
     console.log("[INFO] Gradle wrapper version:", gradleVersion);
   } else {
@@ -379,12 +426,26 @@ function getProjectReport(projectPath) {
   const warnings = results.filter(
     item => item.status === "warning"
   ).length;
+const javaOutput = getJavaVersion();
+const javaVersion = parseJavaMajor(javaOutput);
+const gradleVersion = getGradleVersion(absolutePath);
+const agpVersion = getAgpVersion(absolutePath);
+
+const compatibility = checkCompatibility({
+  agpVersion,
+  gradleVersion,
+  javaVersion
+});
 
   return {
     project: path.basename(absolutePath),
     projectPath: absolutePath,
     status: warnings === 0 ? "passed" : "warning",
     checks: results,
+    agpVersion,
+    gradleVersion,
+    javaVersion,
+    compatibility,
     summary: {
       total: results.length,
       passed,
@@ -397,13 +458,6 @@ function getProjectReport(projectPath) {
   };
 }
 
-if (require.main === module) {
-  diagnose(process.argv[2] || ".");
-}
-
-module.exports = {
-  diagnose
-};
 
 if (require.main === module) {
   const args = process.argv.slice(2);

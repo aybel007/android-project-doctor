@@ -37,7 +37,12 @@ test("Kotlin Gradle configuration detection", () => {
   const output = scan("sample-kotlin");
 
   verifyGradleConfig(output, "build.gradle.kts");
+
+  assert.ok(output.includes("[WARN] Gradle version could not be detected."));
+  assert.ok(output.includes("[INFO] Overall compatibility: unknown"));
+  assert.ok(output.includes("[WARN] AGP / Gradle: AGP or Gradle version could not be detected."));
 });
+
 test("Missing SDK configuration is reported", () => {
   const output = scan("sample-incomplete");
 
