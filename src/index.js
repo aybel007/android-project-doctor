@@ -1,4 +1,3 @@
-
 const fs = require("node:fs");
 const path = require("node:path");
 const { spawnSync } = require("node:child_process");
@@ -328,5 +327,104 @@ analyzeGradleConfig(absolutePath);
   console.log("\nAndroid Project Doctor scan completed.\n");
 }
 
-diagnose(process.argv[2] || ".");
+function getProjectReport(projectPath) {
+  const absolutePath = path.resolve(projectPath);
 
+  if (!fs.existsSync(absolutePath) ||
+      !fs.statSync(absolutePath).isDirectory()) {
+    return {
+      status: "error",
+      error: "Project directory not found."
+    };
+  }
+
+  const checks = [
+    ["Gradle build file", [
+      "build.gradle",
+      "build.gradle.kts",
+      "app/build.gradle",
+      "app/build.gradle.kts"
+    ]],
+    ["Gradle settings", [
+      "settings.gradle",
+      "settings.gradle.kts"
+    ]],
+    ["Gradle wrapper", [
+      "gradlew",
+      "gradlew.bat"
+    ]],
+    ["Android Manifest", [
+      "app/src/main/AndroidManifest.xml"
+    ]],
+    ["Gradle wrapper properties", [
+      "gradle/wrapper/gradle-wrapper.properties"
+    ]]
+  ];
+
+  const results = checks.map(([name, files]) => {
+    const found = files.some(file =>
+      fs.existsSync(path.join(absolutePath, file))
+    );
+
+    return {
+      name,
+      status: found ? "passed" : "warning"
+    };
+  });
+
+  const passed = results.filter(
+    item => item.status === "passed"
+  ).length;
+
+  const warnings = results.filter(
+    item => item.status === "warning"
+  ).length;
+
+  return {
+    project: path.basename(absolutePath),
+    projectPath: absolutePath,
+    status: warnings === 0 ? "passed" : "warning",
+    checks: results,
+    summary: {
+      total: results.length,
+      passed,
+      warnings,
+      failed: 0,
+      score: Math.round(
+        (passed / results.length) * 100
+      )
+    }
+  };
+}
+
+if (require.main === module) {
+  diagnose(process.argv[2] || ".");
+}
+
+module.exports = {
+  diagnose
+};
+
+if (require.main === module) {
+  const args = process.argv.slice(2);
+  const jsonMode = args.includes("--json");
+
+  const projectPath =
+    args.find(arg => arg !== "--json") || ".";
+
+  if (jsonMode) {
+    const report = getProjectReport(projectPath);
+    console.log(JSON.stringify(report, null, 2));
+
+    if (report.status === "error") {
+      process.exitCode = 1;
+    }
+  } else {
+    diagnose(projectPath);
+  }
+}
+
+module.exports = {
+  diagnose,
+  getProjectReport
+};
