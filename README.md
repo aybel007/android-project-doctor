@@ -1,46 +1,41 @@
 # Android Project Doctor
 
-A lightweight command-line diagnostic tool that helps Android developers inspect project configuration and identify common setup problems.
+A lightweight, open-source command-line diagnostic tool that helps Android developers inspect project configuration, validate SDK setup, and identify compatibility issues between Android Gradle Plugin (AGP), Gradle, and Java.
 
 ## Features
 
-- Android project file validation
-- Gradle build configuration detection
-- Groovy Gradle DSL analysis
-- Kotlin Gradle DSL analysis
+- Android project structure validation
+- Groovy and Kotlin Gradle DSL detection
 - Android SDK path detection
 - Android platform validation
 - Android Build Tools validation
 - Java version detection
 - Gradle wrapper version detection
+- AGP, Gradle, and Java compatibility checks
+- JSON diagnostic reports
 - Automated tests using Node.js
 
 ## Requirements
 
 - Node.js 18 or later
-- Android project directory
-- Android SDK (optional for project-only checks)
+- An Android project directory
+- Android SDK (optional for project structure and version checks)
 
-## Getting Started
+## Installation
 
 Clone the repository:
 
 ```bash
 git clone https://github.com/aybel007/android-project-doctor.git
-```
-
-Enter the project:
-
-```bash
 cd android-project-doctor
 ```
 
 ## Usage
 
-Run the diagnostic tool:
+Run a diagnostic scan:
 
 ```bash
-node src/index.js /path/to/your/android/project
+node src/index.js /path/to/android/project
 ```
 
 Example:
@@ -49,11 +44,37 @@ Example:
 node src/index.js tests/sample-android
 ```
 
-For Kotlin DSL testing:
+Generate a JSON report:
 
 ```bash
-node src/index.js tests/sample-kotlin
+node src/index.js tests/sample-android --json
 ```
+
+The JSON report includes:
+
+- Project information
+- Project file checks
+- Detected AGP version
+- Detected Gradle version
+- Detected Java version
+- Compatibility results
+- Diagnostic summary
+
+## Compatibility Checks
+
+Android Project Doctor checks compatibility between:
+
+1. Android Gradle Plugin and Gradle
+2. Java and Gradle
+3. Android Gradle Plugin and Java
+
+Compatibility results are reported as:
+
+- `compatible`
+- `incompatible`
+- `unknown`
+
+An `unknown` result means the required version information or a supported compatibility rule is unavailable. It does not necessarily mean the project is incompatible.
 
 ## Running Tests
 
@@ -67,6 +88,7 @@ Check JavaScript syntax:
 
 ```bash
 node --check src/index.js
+node --check src/compatibility.js
 ```
 
 ## Project Structure
@@ -77,36 +99,30 @@ android-project-doctor/
 │   └── workflows/
 │       └── tests.yml
 ├── src/
-│   └── index.js
+│   ├── index.js
+│   └── compatibility.js
 ├── tests/
+│   ├── api.test.js
+│   ├── compatibility.test.js
+│   ├── gradle-analysis.test.js
 │   ├── sample-android/
 │   ├── sample-incomplete/
 │   ├── sample-kotlin/
-│   └── gradle-analysis.test.js
-├── .gitignore
+│   └── sample-sdk/
 ├── LICENSE
-├── package.json
-└── README.md
+├── README.md
+└── package.json
 ```
-
-## Current Development Status
-
-Android Project Doctor is under active development.
-
-The current version focuses on Android project structure, SDK environment checks, and Gradle configuration analysis.
-
-More diagnostic features and improvements are planned.
 
 ## Contributing
 
 Contributions, bug reports, and feature suggestions are welcome.
 
-Please open an issue before submitting major changes.
+Please read CONTRIBUTING.md before submitting changes.
 
 ## License
 
 This project is licensed under the ISC License.
-
 See the LICENSE file for details.
 
 ## Author

@@ -1,16 +1,29 @@
 {
   "name": "android-project-doctor",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "A lightweight CLI tool for diagnosing Android project configuration, SDK setup, and AGP, Gradle, and Java compatibility.",
+  "main": "src/index.js",
   "directories": {
     "test": "tests"
   },
   "scripts": {
     "test": "node --test"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "android",
+    "android-development",
+    "gradle",
+    "android-sdk",
+    "agp",
+    "java",
+    "cli",
+    "diagnostics",
+    "developer-tools"
+  ],
+  "author": "Aybel",
   "license": "ISC",
-  "type": "commonjs"
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18"
+  }
 }
