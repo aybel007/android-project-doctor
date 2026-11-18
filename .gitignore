@@ -1,0 +1,10 @@
+node_modules/
+*.bak
+*.backup
+*.tmp
+local.properties
+.gradle/
+build/
+.DS_Store
+*.backup*
+*.before-*

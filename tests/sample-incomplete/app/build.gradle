@@ -1,0 +1,12 @@
+plugins {
+    id 'com.android.application' version '8.7.3'
+}
+
+android {
+    namespace 'com.example.incomplete'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'com.example.incomplete'
+    }
+}
