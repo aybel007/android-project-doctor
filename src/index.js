@@ -397,13 +397,6 @@ function getProjectReport(projectPath) {
   };
 }
 
-if (require.main === module) {
-  diagnose(process.argv[2] || ".");
-}
-
-module.exports = {
-  diagnose
-};
 
 if (require.main === module) {
   const args = process.argv.slice(2);
